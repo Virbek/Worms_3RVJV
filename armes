@@ -1,2 +1,24 @@
 import pygame
+from abc import ABC, abstractmethod
 
+def class armes(ABC):
+    
+    def utiliser_arme(self):
+        pass
+    
+
+def class grenade(armes):
+    
+    vitesseX = 0
+    vitesseY = 0
+    angle = 0
+    
+    def __init__(self, x, y):
+        self._x = x 
+        self._y = y         
+        
+    def ajout_de_force(self):
+        vitesseX += 1
+        vitesseY += 1
+        
+    
