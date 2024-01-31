@@ -1,21 +1,20 @@
 import pygame
+from evenement import Evenement
 
 pygame.init()
 screen = pygame.display.set_mode((1280,720))
 clock = pygame.time.Clock()
-running = True
+evenement = Evenement(screen)
 
-while running :
+while evenement.running :
     
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            
-        screen.fill("purple")
+    evenement.event()   
+    pygame.draw.circle(screen, (255, 255, 255), (500, 150), 10)
+    screen.fill("purple")
+         
+    pygame.display.flip()
+           
+    clock.tick(60)
         
-        pygame.display.flip()
-        
-        clock.tick(60)
-        
-pygame.quit    
+pygame.quit()    
     
