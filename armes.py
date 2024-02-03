@@ -11,14 +11,16 @@ class Grenade(Armes):
     def __init__(self, x, y):
         self._x = x 
         self._y = y  
+        self.InitialX = x
+        self.InitialY = y
         self.vitesseX = 0
         self.vitesseY = 0
-        angle = 0       
+        self.angle = 0       
         
     def ajout_de_force(self):
-        if(self.vitesseX < 1000 and self.vitesseY < 1000):
-            self.vitesseX = self.vitesseX + 10
-            self.vitesseY = self.vitesseY + 10
+        if(self.vitesseX < 100 and self.vitesseY < 100):
+            self.vitesseX = self.vitesseX + 1
+            self.vitesseY = self.vitesseY + 1
             
     def reset_force(self):
         self.vitesseX = 0
