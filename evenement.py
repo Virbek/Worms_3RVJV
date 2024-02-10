@@ -69,13 +69,27 @@ class Evenement:
             self.equation_traj(math.radians(self.grenade.angle), self.grenade._InitialX, self.grenade._InitialY, self.temps_ecoule, self.grenade._vitesseX, self.grenade._vitesseY, self.grenade)
             self.temps_ecoule += self.dt
             if self.grenade.y > 700 :
+                for player in self.player:
+                    print("pv avant :", player.pv)
+                    self.ranged(player)
+                    if player.pv == 0 :
+                        self.player.remove(player)    
                 self.grenade.reset_force()
                 self.lancer = False
+                self.exist = False
                 self.grenade.angle = 0
         if self.exist:
             pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), 10)
             print(self.grenade.x,self.grenade.y,self.grenade._vitesseX,self.grenade._vitesseY,self.grenade.angle)
 
+    
+    def ranged(self, player):
+        distance = pygame.math.Vector2(self.grenade.x - player.x, self.grenade.y - player.y).length()
+        pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), self.grenade.radius)
+        if distance <= self.grenade.radius:
+            print("je suis dedans")
+            player.pv -= 100
+        print(" pv apres :", player.pv)
      
     def equation_traj(self,angle_radian, initialX, initialY, temps, vitesseX, vitesseY, objet):
         objet.x = float(vitesseX)*math.cos(angle_radian)*float(temps) + initialX

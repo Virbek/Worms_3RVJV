@@ -1,16 +1,10 @@
-from abc import ABC, abstractmethod
 
-class Armes(ABC):
-    
-    def utiliser_arme(self):
-        pass
-    
-
-class Grenade(Armes):
+class Grenade:
     
     def __init__(self, x, y):
         self.x = x 
         self.y = y  
+        self.radius = 50
         self._InitialX = x
         self._InitialY = y
         self._vitesseX = 0
@@ -26,6 +20,7 @@ class Grenade(Armes):
         self._vitesseX = 0
         self._vitesseY = 0
     
+        
     
         
     
