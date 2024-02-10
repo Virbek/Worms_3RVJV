@@ -1,67 +1,87 @@
 import pygame
 import math
+import random
 from armes import Grenade
+from player import Player
 
-
+vitesse = 10
 
 class Evenement:
+
     
-    #Initialise le jeu
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((1280,720))
         self.clock = pygame.time.Clock()
+        self.player = []
+        self.equipe = []
+        nbr_equipe = 2
+        nbr_plr = 2
+        for i in range(nbr_plr):
+            positionX = random.randrange(20, 1180, 50)
+            self.player.append(Player(positionX, 700))
+        
+            
+        self.tour = 0
         self.running = True
         self.lancer = False
         self.grenade = None
         self.exist = False
     
-    #Gere les evenement choisi par le joueur  
+           
     def event(self):
+        for player in self.player:
+            pygame.draw.circle(self.screen, (0, 0, 0), (player.x, player.y), 20)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
             if self.grenade is not None:
                 self.grenade.ajout_de_force()
-                print(self.grenade.vitesseX, self.grenade.vitesseY)
-        
+        if keys[pygame.K_d]:
+            self.player[self.tour].x += vitesse
+        if keys[pygame.K_q]:
+            self.player[self.tour].x -= vitesse 
+    
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
-                    self.grenade = Grenade(250,250)
-                    self.exist = True   
-                if event.key == pygame.K_LEFT:
-                    if self.grenade is not None:
-                        self.grenade.angle += 10
+                    self.grenade = Grenade( self.player[self.tour].x + 5, self.player[self.tour].y)
+                    self.exist = True  
+                    self.change = True
                 if event.key == pygame.K_RIGHT:
-                    if self.grenade is not None:
-                        self.grenade.angle -= 10
+                    self.grenade.angle -= 10
+                    self.change = True
+                if event.key == pygame.K_LEFT:
+                    self.grenade.angle += 10
+                    self.change = True   
+                if event.key == pygame.K_r:
+                    self.tour += 1
+                    if self.tour == 2 :
+                        self.tour = 0
+                    
             elif event.type == pygame.KEYUP:
-               if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:
                    self.lancer = True 
                    self.temps_ecoule = 0.0
                 
         if self.lancer:
-            self.mouvement_gre
+            self.equation_traj(math.radians(self.grenade.angle), self.grenade._InitialX, self.grenade._InitialY, self.temps_ecoule, self.grenade._vitesseX, self.grenade._vitesseY, self.grenade)
+            self.temps_ecoule += self.dt
+            if self.grenade.y > 700 :
+                self.grenade.reset_force()
+                self.lancer = False
+                self.grenade.angle = 0
         if self.exist:
-            pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade._x, self.grenade._y), 10)
-            print(self.grenade._x,self.grenade._y,self.grenade.vitesseX,self.grenade.vitesseY, self.grenade.angle)
+            pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), 10)
+            print(self.grenade.x,self.grenade.y,self.grenade._vitesseX,self.grenade._vitesseY,self.grenade.angle)
+
+     
+    def equation_traj(self,angle_radian, initialX, initialY, temps, vitesseX, vitesseY, objet):
+        objet.x = float(vitesseX)*math.cos(angle_radian)*float(temps) + initialX
+        objet.y = 0.5*(9.8)*float(temps**2) + float(vitesseY)*math.sin(angle_radian)*float(temps) + initialY
     
-    
-    #mouvement que la grenade fait une fois lancer
-    def mouvement_gre(self):
-        angle_radian = math.radians(self.grenade.angle)
-        self.grenade._x = float(self.grenade.vitesseX)*math.cos(angle_radian)*float(self.temps_ecoule) + self.grenade.InitialX
-        self.grenade._y = 0.5*(9.8)*float(self.temps_ecoule**2) + float(self.grenade.vitesseY)*math.sin(angle_radian)*float(self.temps_ecoule) + self.grenade.InitialY
-        self.temps_ecoule += self.dt
-        if self.grenade._y > 710 :
-            self.grenade.reset_force()
-            self.lancer = False
-    
-    
-    
-    #boucle de jeu    
+           
     def run(self):
         while self.running :
             self.screen.fill("purple")
@@ -69,7 +89,7 @@ class Evenement:
                 
             pygame.display.flip()
             self.clock.tick(60)
-            self.dt = self.clock.tick(60)/16.0
+            self.dt = self.clock.tick(60)/16
         pygame.quit()
         
         

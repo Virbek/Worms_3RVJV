@@ -9,29 +9,23 @@ class Armes(ABC):
 class Grenade(Armes):
     
     def __init__(self, x, y):
-        self._x = x 
-        self._y = y  
-        self.InitialX = x
-        self.InitialY = y
-        self.vitesseX = 0
-        self.vitesseY = 0
+        self.x = x 
+        self.y = y  
+        self._InitialX = x
+        self._InitialY = y
+        self._vitesseX = 0
+        self._vitesseY = 0
         self.angle = 0       
         
     def ajout_de_force(self):
-        if(self.vitesseX < 100 and self.vitesseY < 100):
-            self.vitesseX = self.vitesseX + 1
-            self.vitesseY = self.vitesseY + 1
+        if(self._vitesseX < 100 and self._vitesseY < 100):
+            self._vitesseX = self._vitesseX + 1
+            self._vitesseY = self._vitesseY + 1
             
     def reset_force(self):
-        self.vitesseX = 0
-        self.vitesseY = 0
+        self._vitesseX = 0
+        self._vitesseY = 0
     
-    
-    def get_vitesseX(self):
-        return self.vitesseX
-    
-    def get_vitesseY(self):
-        return self.vitesseY
     
         
     
