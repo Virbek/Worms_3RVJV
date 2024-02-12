@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 from armes import Grenade
+from armes import LanceGrenade
 from player import Player
 
 vitesse = 10
@@ -26,6 +27,7 @@ class Evenement:
         self.running = True
         self.lancer = False
         self.grenade = None
+        self.lanceGrenade = None
         self.exist = False
         self.jump = False
         self.jump_direction = 0
@@ -40,10 +42,11 @@ class Evenement:
         if keys[pygame.K_SPACE]:
             if self.grenade is not None:
                 self.grenade.ajout_de_force()
+            if self.lanceGrenade is not None:
+                self.lanceGrenade.ajout_de_force()
         if keys[pygame.K_d]:
             if self.exist != True:
-                self.player[self.tour].x += vitesse
-            
+                self.player[self.tour].x += vitesse  
         if keys[pygame.K_q]:
             if self.exist != True:
                 self.player[self.tour].x -= vitesse 
@@ -53,9 +56,11 @@ class Evenement:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_g:
                     self.grenade = Grenade( self.player[self.tour].x + 5, self.player[self.tour].y)
                     self.exist = True  
+                if event.key == pygame.K_l:
+                    self.lanceGrenade = LanceGrenade(self.player[self.tour].x + 5, self.player[self.tour].y)
                 if event.key == pygame.K_RIGHT:
                     self.grenade.angle -= 10
                 if event.key == pygame.K_SPACE:
