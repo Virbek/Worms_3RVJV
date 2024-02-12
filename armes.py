@@ -22,10 +22,18 @@ class Grenade:
         self._vitesseX = 0
         self._vitesseY = 0
         
+    def rebond(self):
+        print("je suis appelé")
+        self._vitesseX = 0.4*self._vitesseX
+        self._vitesseY = 0.4*self._vitesseY
+        print(self._vitesseX, self._vitesseY)
+        
     def setPositionInitiale(self, x, y):
         self._InitialX = x
         self._InitialY = y
     
+    def get_vitesseX(self):
+        return self._vitesseX
         
     
         

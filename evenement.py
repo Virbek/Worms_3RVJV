@@ -34,6 +34,8 @@ class Evenement:
     def event(self):
         for player in self.player:
             pygame.draw.circle(self.screen, (0, 0, 0), (player.x, player.y), 20)
+        if len(self.player) < 2:
+            self.running = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
             if self.grenade is not None:
@@ -84,11 +86,14 @@ class Evenement:
             #lancer de la gravite
             self.equation_traj(math.radians(self.grenade.angle), self.grenade._InitialX, self.grenade._InitialY, self.temps_ecoule, self.grenade._vitesseX, self.grenade._vitesseY, self.grenade)
             self.temps_ecoule += self.dt
-            #la grenade touche le sol
-            if self.grenade.y > 700 :
+            if self.grenade.get_vitesseX() < 5:
                 self.lancer = False
-                #la grenade explose et regarde si elle touche tout un joueur 
-                self.grenade.y = 700  
+            #la grenade touche le sol
+            if self.grenade.y > 695 :
+                self.grenade.y = 690
+                self.grenade.rebond()
+                self.temps_ecoule= 0.0
+                self.grenade.setPositionInitiale(self.grenade.x, self.grenade.y)
                        
                 #self.grenade.reset_force()
                 self.grenade.angle = 0
@@ -126,7 +131,6 @@ class Evenement:
         #rentre des que la grenade est créé
         if self.exist:
             pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), 10)
-            print(self.grenade.x,self.grenade.y,self.grenade._vitesseX,self.grenade._vitesseY,self.grenade.angle)
         if self.tour == 2 :
                         self.tour = 0
 
