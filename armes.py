@@ -44,15 +44,19 @@ class LanceGrenade :
         self.angle = 0
         self._initialX = x
         self._initialY = y
-        self.vitesseX = 0
+        self._vitesseX = 0
         self._vitesseY = 0
+        self.masse = 8
         
        
     def ajout_de_force(self):
         if(self._vitesseX < 1000 and self._vitesseY < 1000):
-            self._vitesseX = self._vitesseX + 10
-            self._vitesseY = self._vitesseY + 10
-        
+            self._vitesseX = self._vitesseX + 1
+            self._vitesseY = self._vitesseY + 1
+    
+    def setPositionInitiale(self, x, y):
+        self._InitialX = x
+        self._InitialY = y   
     
         
         
