@@ -21,6 +21,7 @@ class Grenade:
     def reset_force(self):
         self._vitesseX = 0
         self._vitesseY = 0
+        self.angle = 0
         
     def rebond(self):
         print("je suis appelé")

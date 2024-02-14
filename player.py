@@ -6,6 +6,7 @@ class Player:
         self._initialX = x
         self._initialY = y
         self.pv = 100
+        self.direction = "DROITE"
         
     def set_x(self, x):
         self.x = x
@@ -22,4 +23,9 @@ class Player:
     def setPositionInitiale(self, x, y):
         self._initialX = x
         self._initialY = y
+    
+    def set_direction(self, direction):
+        self.direction = direction
+        
+    
     
