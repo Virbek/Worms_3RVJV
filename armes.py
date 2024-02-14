@@ -24,10 +24,8 @@ class Grenade:
         self.angle = 0
         
     def rebond(self):
-        print("je suis appelé")
         self._vitesseX = 0.4*self._vitesseX
         self._vitesseY = 0.4*self._vitesseY
-        print(self._vitesseX, self._vitesseY)
         
     def setPositionInitiale(self, x, y):
         self._InitialX = x
@@ -43,8 +41,8 @@ class LanceGrenade :
         self.y = y 
         self.radius = 50
         self.angle = 0
-        self._initialX = x
-        self._initialY = y
+        self._InitialX = x
+        self._InitialY = y
         self._vitesseX = 0
         self._vitesseY = 0
         self.masse = 8

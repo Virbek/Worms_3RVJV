@@ -40,7 +40,7 @@ class Evenement:
         self.jump = False
         self.jump_direction = 0
         self.n_equipe = 0
-    
+        self.point_trajectoire = []    
            
     def handle_event(self):
         print(self.tour, self.nbr_tour)
@@ -52,21 +52,20 @@ class Evenement:
               #  self.running = False
             
         self.event()
-        if self.tour == self.nbr_tour :
-            self.tour = 0
         self.booleen()
 
 
 
     def event(self):
-        player = self.equipe[0][self.tour]
+        player = self.equipe[0][int(self.tour)]
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_UP]:
             if self.grenade is not None:
                 self.grenade.ajout_de_force()
+                self.reset_traj(self.grenade)
             if self.lanceGrenade is not None:
                 self.lanceGrenade.ajout_de_force()
-                
+                self.reset_traj(self.lanceGrenade)       
         if keys[pygame.K_d]:
             if self.exist_gre != True and self.exist_langre != True:
                 player.x += vitesse 
@@ -86,9 +85,11 @@ class Evenement:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
                     self.grenade = Grenade( player.x + 5, player.y)
+                    self.balle = Grenade(self.grenade.x, self.grenade.y)
                     self.exist_gre = True  
                 if event.key == pygame.K_l:
                     self.lanceGrenade = LanceGrenade(player.x + 5, player.y)
+                    self.balle = LanceGrenade(self.lanceGrenade.x, self.lanceGrenade.y)
                     self.exist_langre = True
                 if event.key == pygame.K_SPACE:
                     if self.jump != True:
@@ -100,17 +101,22 @@ class Evenement:
                                 self.jump_direction = 1
                             elif keys[pygame.K_q]:
                                 self.jump_direction = 2
+                
                             
                 if event.key == pygame.K_LEFT:
                     if self.exist_gre:
                         self.grenade.angle += 10
+                        self.reset_traj(self.grenade)
                     if self.exist_langre:
                         self.lanceGrenade.angle += 10
+                        self.reset_traj(self.lanceGrenade)
                 if event.key == pygame.K_RIGHT:
                     if self.exist_gre:
                         self.grenade.angle -= 10
+                        self.reset_traj(self.grenade)
                     if self.exist_langre:
                         self.lanceGrenade.angle -= 10
+                        self.reset_traj(self.lanceGrenade)
                 if event.key == pygame.K_r:
                     self.tour += 1
                     
@@ -122,14 +128,18 @@ class Evenement:
                         self.grenade.delay = True
                         self.temps_ecoule = 0.0
                         self.grenade.impact = 0.0
+                        self.reset_traj(self.grenade)
                     if self.exist_langre:
                         self.temps_ecoule = 0.0
                         self.lancer = True
                         self.lanceGrenade.setPositionInitiale(self.lanceGrenade.x, self.lanceGrenade.y)
+                        self.reset_traj(self.lanceGrenade)
+        if self.tour == self.nbr_tour :
+            self.tour = 0
 
 
     def booleen(self):
-        player = self.equipe[0][self.tour]
+        player = self.equipe[0][int(self.tour)]
         #Si une arme est lancé
         if self.lancer:
             
@@ -143,6 +153,8 @@ class Evenement:
                 #Si plus assez de vitesse pour rebondir
                 if self.grenade.get_vitesseX() < 5:
                     self.lancer = False
+                    self.grenade.x += self.grenade.get_vitesseX()
+                    self.grenade.reset_force() 
                     
                 #la grenade touche le sol
                 if self.grenade.y > 610 :
@@ -183,7 +195,7 @@ class Evenement:
                                 #self.nbr_tour -= 1
                         self.exist_gre = False
                         self.lancer = False
-                        self.tour += 1     
+                        self.tour += 0.5     
                         self.grenade.delay = False   
         #Si la touche saut est pressé      
         if self.jump:
@@ -205,9 +217,14 @@ class Evenement:
         #rentre des que la grenade est créé
         if self.exist_gre:
             pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), 10)
+            if self.lancer != True :
+                self.trajectoire_gre(self.grenade, self.balle)
         if self.exist_langre:
             pygame.draw.circle(self.screen, (255,0,0),(self.lanceGrenade.x, self.lanceGrenade.y), 10)
-        
+            if self.lancer != True :
+                self.trajectoire_lan(self.lanceGrenade, self.balle)
+        if int(self.tour) == self.nbr_tour :
+            self.tour = 0
 
 
 
@@ -249,6 +266,30 @@ class Evenement:
         if objet.x < 0:
             objet.x = 1270
             objet.setPositionInitiale(objet.x, y)
+            
+    def trajectoire_gre(self, objet, balle):
+        if balle.y > 610 :
+            if len(self.point_trajectoire) >= 2:
+                pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
+        else :
+            self.equation_traj(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle)
+            self.point_trajectoire.append((int(balle.x), int(balle.y)))
+            self.temps_ecoule += self.dt
+    
+    def trajectoire_lan(self, objet, balle):
+        if balle.y > 610 :
+            if len(self.point_trajectoire) >= 2:
+                pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
+        else :
+            self.equation_traj_frott(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle, 0.5, self.ground.ventX, self.ground.ventY)
+            self.point_trajectoire.append((int(balle.x), int(balle.y)))
+            self.temps_ecoule += self.dt
+    
+    def reset_traj(self, objet) :
+        self.point_trajectoire = []
+        self.balle.x = objet.x
+        self.balle.y = objet.y
+        self.temps_ecoule = 0.0
 
     #boucle de jeu
     def run(self):
