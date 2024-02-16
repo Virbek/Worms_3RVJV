@@ -1,12 +1,19 @@
+import pygame
+
+
 class Player:
     
-    def __init__(self, x, y):
+    def __init__(self, x, y, image_path):
         self.x = x
         self.y = y
         self._initialX = x
         self._initialY = y
         self.pv = 100
         self.direction = "DROITE"
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y - 60
         
     def set_x(self, x):
         self.x = x
@@ -26,6 +33,14 @@ class Player:
     
     def set_direction(self, direction):
         self.direction = direction
+    
+    def change_image(self, image_path):
+        self.image = pygame.image.load(image_path)
+    
+    def draw(self,screen):
+        screen.blit(self.image, self.rect)
+        self.rect.x = self.x
+        self.rect.y = self.y - 60
         
     
     

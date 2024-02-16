@@ -25,7 +25,7 @@ class Evenement:
         for i in range(self.nbr_equipe):
             for i in range(self.nbr_plr):
                 positionX = random.randrange(20, 1180, 50)
-                player.append(Player(positionX, 600))
+                player.append(Player(positionX, 600,"ressource\Perso_Statique.png"))
             self.equipe.append(player)
             
         self.nbr_tour = self.nbr_equipe * self.nbr_plr
@@ -43,17 +43,15 @@ class Evenement:
         self.point_trajectoire = []    
            
     def handle_event(self):
-        print(self.tour, self.nbr_tour)
-        
+        tour_actuelle = self.tour
         for equipe in self.equipe:
             for player in equipe:
-                pygame.draw.circle(self.screen, (0, 0, 0), (player.x, player.y), 20)
+                player.draw(self.screen)
             #if len(self.player) < self.nbr_plr:
               #  self.running = False
             
         self.event()
         self.booleen()
-
 
 
     def event(self):
@@ -69,7 +67,7 @@ class Evenement:
         if keys[pygame.K_d]:
             if self.exist_gre != True and self.exist_langre != True:
                 player.x += vitesse 
-                player.set_direction("DROITE") 
+                player.set_direction("DROITE")
                 self.bord(player, player.y)
                 
         if keys[pygame.K_q]:
@@ -84,11 +82,11 @@ class Evenement:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
-                    self.grenade = Grenade( player.x + 5, player.y)
+                    self.grenade = Grenade( player.x + 35, player.y - 10)
                     self.balle = Grenade(self.grenade.x, self.grenade.y)
                     self.exist_gre = True  
                 if event.key == pygame.K_l:
-                    self.lanceGrenade = LanceGrenade(player.x + 5, player.y)
+                    self.lanceGrenade = LanceGrenade(player.x + 35, player.y-10)
                     self.balle = LanceGrenade(self.lanceGrenade.x, self.lanceGrenade.y)
                     self.exist_langre = True
                 if event.key == pygame.K_SPACE:
@@ -152,7 +150,6 @@ class Evenement:
                 
                 #Si plus assez de vitesse pour rebondir
                 if self.grenade.get_vitesseX() < 5:
-                    self.lancer = False
                     self.grenade.x += self.grenade.get_vitesseX()
                     self.grenade.reset_force() 
                     
@@ -174,8 +171,8 @@ class Evenement:
                     for equipe in self.equipe:
                         for player in equipe:
                             self.ranged(player, self.lanceGrenade)
-                            #if player.pv == 0 :
-                                #equipe[player].remove(player)
+                            if player.pv == 0 :
+                                self.equipe[0].remove(player)
                     self.exist_langre = False
                     self.lancer = False
                     self.tour += 1
@@ -190,44 +187,55 @@ class Evenement:
                     for equipe in self.equipe:
                         for player in equipe:
                             self.ranged(player, self.grenade)
-                            #if player.pv == 0 :
-                                #self.equipe[equipe].remove(player)
-                                #self.nbr_tour -= 1
+                            if player.pv == 0 :
+                                self.equipe[equipe].remove(player)
+                                self.nbr_tour -= 1
                         self.exist_gre = False
                         self.lancer = False
                         self.tour += 0.5     
-                        self.grenade.delay = False   
+                        self.grenade.delay = False 
+                        
         #Si la touche saut est pressé      
         if self.jump:
             #jump vers le haut
             if self.jump_direction == 0:
+                self.affiche_ver(player,"ressource\Perso_Saut.png", "ressource\Perso_Saut_inverse.png")
                 self.equation_traj(math.radians(-90), player.get_initialX(), player.get_initialY(), self.temps_ecoule, 70, 70, player)
             #jump vers la droite  
             if self.jump_direction == 1 :
+                player.change_image("ressource\Perso_Saut.png") 
                 self.equation_traj(math.radians(-55), player.get_initialX(), player.get_initialY(), self.temps_ecoule, 60, 60, player)
             #jump vers la gauche
             if self.jump_direction == 2:
+                player.change_image("ressource\Perso_Saut_inverse.png")
                 self.equation_traj(math.radians(-135), player.get_initialX(), player.get_initialY(), self.temps_ecoule, 60, 60, player)
             self.temps_ecoule += self.dt
             if( player.y > 610):
                 player.y = 600
                 self.jump = False
-                self.temps_ecoule = 0.0
-                 
-        #rentre des que la grenade est créé
+                self.temps_ecoule = 0.0 
+        else:  
+            self.affiche_ver(player,"ressource\Perso_Statique.png","ressource\Perso_Statique_inversee.png")
+        
         if self.exist_gre:
-            pygame.draw.circle(self.screen, (0, 0, 255), (self.grenade.x, self.grenade.y), 10)
             if self.lancer != True :
                 self.trajectoire_gre(self.grenade, self.balle)
-        if self.exist_langre:
-            pygame.draw.circle(self.screen, (255,0,0),(self.lanceGrenade.x, self.lanceGrenade.y), 10)
+                self.affiche_ver(player,"ressource\Perso_Grenade.png","ressource\Perso_Grenade_inversee.png")
+        #rentre quand le lance-grenade existe
+        elif self.exist_langre:
             if self.lancer != True :
                 self.trajectoire_lan(self.lanceGrenade, self.balle)
+                self.affiche_ver(player,"ressource\Perso_Bazooka.png","ressource\Perso_Bazooka_inversee.png") 
+                    
         if int(self.tour) == self.nbr_tour :
             self.tour = 0
 
 
-
+    def affiche_ver(self, player, droite, gauche):
+        if player.direction == "DROITE":
+            player.change_image(droite) 
+        else :
+            player.change_image(gauche) 
     #gere la zone d'explosion de la grenade
     def ranged(self, player, objet):
         distance = pygame.math.Vector2(objet.x - player.x, objet.y - player.y).length()
@@ -267,21 +275,27 @@ class Evenement:
             objet.x = 1270
             objet.setPositionInitiale(objet.x, y)
             
+    #calcul la trajectoire de la grenade        
     def trajectoire_gre(self, objet, balle):
-        if balle.y > 610 :
+        if balle.y == 620 :
             if len(self.point_trajectoire) >= 2:
                 pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
         else :
             self.equation_traj(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle)
+            if balle.y > 610 :
+                balle.y = 620
             self.point_trajectoire.append((int(balle.x), int(balle.y)))
             self.temps_ecoule += self.dt
     
+    #calcul la trajectoire du lance grenade  
     def trajectoire_lan(self, objet, balle):
-        if balle.y > 610 :
+        if balle.y == 620 :
             if len(self.point_trajectoire) >= 2:
                 pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
         else :
             self.equation_traj_frott(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle, 0.5, self.ground.ventX, self.ground.ventY)
+            if balle.y > 610 :
+                balle.y = 620
             self.point_trajectoire.append((int(balle.x), int(balle.y)))
             self.temps_ecoule += self.dt
     
@@ -291,6 +305,13 @@ class Evenement:
         self.balle.y = objet.y
         self.temps_ecoule = 0.0
 
+
+
+    def initialisation_image(self):
+        per_idle_path = "ressource/Perso_Statique"
+        self.per_idle = pygame.image.load(per_idle_path)
+        
+        
     #boucle de jeu
     def run(self):
         tour_actuelle = 0
