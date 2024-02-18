@@ -20,12 +20,12 @@ class Evenement:
         self.clock = pygame.time.Clock()
         player = []
         self.equipe = []
-        self.nbr_equipe = 2
+        self.nbr_equipe = 3
         self.nbr_plr = 2
         for i in range(self.nbr_equipe):
-            for i in range(self.nbr_plr):
+            for j in range(self.nbr_plr):
                 positionX = random.randrange(20, 1180, 50)
-                player.append(Player(positionX, 600,"ressource\Perso_Statique.png"))
+                player.append(Player(positionX, 600,"ressource\Perso_Statique.png",i+1))
             self.equipe.append(player)
             
         self.nbr_tour = self.nbr_equipe * self.nbr_plr
@@ -43,13 +43,13 @@ class Evenement:
         self.point_trajectoire = []    
            
     def handle_event(self):
-        tour_actuelle = self.tour
+        self.test_fin_tour()
         for equipe in self.equipe:
             for player in equipe:
                 player.draw(self.screen)
-            #if len(self.player) < self.nbr_plr:
-              #  self.running = False
-            
+                
+        self.test_personnage()
+             
         self.event()
         self.booleen()
 
@@ -83,7 +83,7 @@ class Evenement:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
                     self.grenade = Grenade( player.x + 35, player.y - 10)
-                    self.balle = Grenade(self.grenade.x, self.grenade.y)
+                    self.balle = Grenade(self.grenade.x +35, self.grenade.y - 10)
                     self.exist_gre = True  
                 if event.key == pygame.K_l:
                     self.lanceGrenade = LanceGrenade(player.x + 35, player.y-10)
@@ -116,7 +116,8 @@ class Evenement:
                         self.lanceGrenade.angle -= 10
                         self.reset_traj(self.lanceGrenade)
                 if event.key == pygame.K_r:
-                    self.tour += 1
+                    if self.lancer != True :
+                        self.tour += 1
                     
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
@@ -132,7 +133,7 @@ class Evenement:
                         self.lancer = True
                         self.lanceGrenade.setPositionInitiale(self.lanceGrenade.x, self.lanceGrenade.y)
                         self.reset_traj(self.lanceGrenade)
-        if self.tour == self.nbr_tour :
+        if self.tour > self.nbr_tour :
             self.tour = 0
 
 
@@ -173,6 +174,8 @@ class Evenement:
                             self.ranged(player, self.lanceGrenade)
                             if player.pv == 0 :
                                 self.equipe[0].remove(player)
+                                self.nbr_tour -= 1
+                                self.test_fin_tour()
                     self.exist_langre = False
                     self.lancer = False
                     self.tour += 1
@@ -188,8 +191,9 @@ class Evenement:
                         for player in equipe:
                             self.ranged(player, self.grenade)
                             if player.pv == 0 :
-                                self.equipe[equipe].remove(player)
+                                self.equipe[0].remove(player)
                                 self.nbr_tour -= 1
+                                self.test_fin_tour()
                         self.exist_gre = False
                         self.lancer = False
                         self.tour += 0.5     
@@ -227,7 +231,7 @@ class Evenement:
                 self.trajectoire_lan(self.lanceGrenade, self.balle)
                 self.affiche_ver(player,"ressource\Perso_Bazooka.png","ressource\Perso_Bazooka_inversee.png") 
                     
-        if int(self.tour) == self.nbr_tour :
+        if int(self.tour) > self.nbr_tour :
             self.tour = 0
 
 
@@ -238,7 +242,7 @@ class Evenement:
             player.change_image(gauche) 
     #gere la zone d'explosion de la grenade
     def ranged(self, player, objet):
-        distance = pygame.math.Vector2(objet.x - player.x, objet.y - player.y).length()
+        distance = pygame.math.Vector2(objet.x - player.x-30, objet.y - player.y-30).length()
         pygame.draw.circle(self.screen, (0, 0, 255), (objet.x, objet.y), objet.radius)
         if distance <= objet.radius:
             player.pv -= 100
@@ -281,7 +285,7 @@ class Evenement:
             if len(self.point_trajectoire) >= 2:
                 pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
         else :
-            self.equation_traj(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle)
+            self.equation_traj(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle) 
             if balle.y > 610 :
                 balle.y = 620
             self.point_trajectoire.append((int(balle.x), int(balle.y)))
@@ -305,13 +309,24 @@ class Evenement:
         self.balle.y = objet.y
         self.temps_ecoule = 0.0
 
-
-
     def initialisation_image(self):
         per_idle_path = "ressource/Perso_Statique"
         self.per_idle = pygame.image.load(per_idle_path)
         
-        
+    def test_personnage(self):
+        tab = []
+        for equipe in self.equipe:
+            for player in equipe:
+                tab.append(player.numero_equipe)
+        identique = all(element == tab[0] for element in tab)
+        if identique:
+            self.running = False
+    
+    #regarde si lorsque qu'un worms est detruit, son tour n'est pas plus grand le nombre de tour possible      
+    def test_fin_tour(self):
+        if self.tour >= self.nbr_tour:
+            self.tour = 0
+            
     #boucle de jeu
     def run(self):
         tour_actuelle = 0

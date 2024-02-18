@@ -3,7 +3,7 @@ import pygame
 
 class Player:
     
-    def __init__(self, x, y, image_path):
+    def __init__(self, x, y, image_path, numero_equipe):
         self.x = x
         self.y = y
         self._initialX = x
@@ -14,6 +14,7 @@ class Player:
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y - 60
+        self.numero_equipe = numero_equipe
         
     def set_x(self, x):
         self.x = x

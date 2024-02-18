@@ -39,7 +39,7 @@ class LanceGrenade :
     def __init__(self, x, y):
         self.x = x
         self.y = y 
-        self.radius = 50
+        self.radius = 150
         self.angle = 0
         self._InitialX = x
         self._InitialY = y
