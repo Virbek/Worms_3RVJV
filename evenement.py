@@ -43,6 +43,7 @@ class Evenement:
         self.point_trajectoire = []    
            
     def handle_event(self):
+        print(self.tour, self.nbr_tour)
         self.test_fin_tour()
         for equipe in self.equipe:
             for player in equipe:
@@ -175,11 +176,7 @@ class Evenement:
                     
             #si lance grenade lancer
             if self.exist_langre:
-                self.lanceGrenade.draw(self.screen)
-                self.equation_traj_frott(math.radians(self.lanceGrenade.angle), self.lanceGrenade._InitialX,self.lanceGrenade._InitialY, self.temps_ecoule, self.lanceGrenade._vitesseX, self.lanceGrenade._vitesseY, self.lanceGrenade, 0.5, self.ground.ventX, self.ground.ventY)
-                self.temps_ecoule += self.dt
-                
-                #la grenade touche le sol
+                #le lanceGrenade touche le sol
                 if self.lanceGrenade.y > 630 :
                     for equipe in self.equipe:
                         for player in equipe:
@@ -191,6 +188,11 @@ class Evenement:
                     self.exist_langre = False
                     self.lancer = False
                     self.tour += 1
+                else:
+                    self.lanceGrenade.draw(self.screen)
+                    self.equation_traj_frott(math.radians(self.lanceGrenade.angle), self.lanceGrenade._InitialX,self.lanceGrenade._InitialY, self.temps_ecoule, self.lanceGrenade._vitesseX, self.lanceGrenade._vitesseY, self.lanceGrenade, self.ground.ventX, self.ground.ventY)
+                    self.temps_ecoule += self.dt
+                    self.lanceGrenade.maj_hitbox()
                 
         #Si une grenade existe        
         if self.grenade is not None:
@@ -198,7 +200,7 @@ class Evenement:
             if self.grenade.delay:
                 self.grenade.impact += self.dt
                 #temps d'explosion 3 sec
-                if self.grenade.impact >= 100.0:
+                if self.grenade.impact >= 60.0:
                     for equipe in self.equipe:
                         for player in equipe:
                             self.ranged(player, self.grenade)
@@ -206,10 +208,10 @@ class Evenement:
                                 self.equipe[0].remove(player)
                                 self.nbr_tour -= 1
                                 self.test_fin_tour()
-                        self.exist_gre = False
-                        self.lancer = False
-                        self.tour += 0.5     
-                        self.grenade.delay = False 
+                    self.exist_gre = False
+                    self.lancer = False
+                    self.tour += 1   
+                    self.grenade.delay = False 
                         
         #Si la touche saut est pressé      
         if self.jump:
@@ -256,8 +258,10 @@ class Evenement:
     #gere la zone d'explosion de la grenade
     def ranged(self, player, objet):
         pygame.draw.circle(self.screen, (0, 0, 255), (objet.x, objet.y), objet.radius)
-        if player.player_rect.colliderect(objet):
-            player.pv -= 100
+        objet.recte = pygame.Rect(objet.x - objet.radius, objet.y - objet.radius, 2* objet.radius, 2* objet.radius)
+        if player.player_rect.colliderect(objet.recte):
+            player.pv -= 25
+            player.maj_pv()
     
     #gere la gravité terrestre sans frottement  
     def equation_traj(self,angle_radian, initialX, initialY, temps, vitesseX, vitesseY, objet):
@@ -266,20 +270,14 @@ class Evenement:
         self.bord(objet, initialY)
         
     #gere equation de trajectoire avec frottement
-    def equation_traj_frott(self,angle_radian, initialX, initialY, temps, vitesseX, vitesseY, objet, coef_frott, ventX, ventY):
-        densite_air = 1.2
+    def equation_traj_frott(self,angle_radian, initialX, initialY, temps, vitesseX, vitesseY, objet, ventX, ventY):
         
-        vitX = float(vitesseX) - ventX
-        vitY = float(vitesseY) - ventY
+        vitesseX = float(vitesseX) - ventX
+        vitesseY = float(vitesseY) - ventY
         
-        force_frottX = -coef_frott * densite_air * vitX * abs(vitX)
-        force_frottY = -coef_frott * densite_air * vitY * abs(vitY)
-        
-        vitesseX += force_frottX/ objet.masse * temps
-        vitesseY += (force_frottY + 9.8 * objet.masse) / objet.masse * temps
         
         objet.x = float(vitesseX)*math.cos(angle_radian)*float(temps) + initialX
-        objet.y = 0.5*(9.8 * objet.masse) * float(temps**2) + float(vitesseY)*math.sin(angle_radian)*float(temps) + initialY
+        objet.y = 0.5*(9.8) * float(temps**2) + float(vitesseY)*math.sin(angle_radian)*float(temps) + initialY
         self.bord(objet, initialY)
     
     #defini les bord du terrain
@@ -309,7 +307,7 @@ class Evenement:
             if len(self.point_trajectoire) >= 2:
                 pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
         else :
-            self.equation_traj_frott(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle, 0.5, self.ground.ventX, self.ground.ventY)
+            self.equation_traj_frott(math.radians(objet.angle), objet._InitialX, objet._InitialY, self.temps_ecoule, objet._vitesseX, objet._vitesseY, balle, self.ground.ventX, self.ground.ventY)
             if balle.y > 610 :
                 balle.y = 620
             self.point_trajectoire.append((int(balle.x), int(balle.y)))
