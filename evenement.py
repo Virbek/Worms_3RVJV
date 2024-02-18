@@ -47,6 +47,7 @@ class Evenement:
         for equipe in self.equipe:
             for player in equipe:
                 player.draw(self.screen)
+                player.texte(self.screen)
                 
         self.test_personnage()
              
@@ -63,16 +64,23 @@ class Evenement:
                 self.reset_traj(self.grenade)
             if self.lanceGrenade is not None:
                 self.lanceGrenade.ajout_de_force()
+                self.reset_traj(self.lanceGrenade) 
+        if keys[pygame.K_DOWN]:
+            if self.grenade is not None:
+                self.grenade.enlever_force()
+                self.reset_traj(self.grenade)
+            if self.lanceGrenade is not None:
+                self.lanceGrenade.enlever_force()
                 self.reset_traj(self.lanceGrenade)       
         if keys[pygame.K_d]:
             if self.exist_gre != True and self.exist_langre != True:
-                player.x += vitesse 
+                player.move_droite(vitesse) 
                 player.set_direction("DROITE")
                 self.bord(player, player.y)
                 
         if keys[pygame.K_q]:
             if self.exist_gre != True and self.exist_langre != True:
-                player.x -= vitesse 
+                player.move_gauche(vitesse) 
                 player.set_direction("GAUCHE")
                 self.bord(player, player.y)
             
@@ -133,7 +141,7 @@ class Evenement:
                         self.lancer = True
                         self.lanceGrenade.setPositionInitiale(self.lanceGrenade.x, self.lanceGrenade.y)
                         self.reset_traj(self.lanceGrenade)
-        if self.tour > self.nbr_tour :
+        if self.tour >= self.nbr_tour :
             self.tour = 0
 
 
@@ -144,31 +152,35 @@ class Evenement:
             
             #si grenade lancer
             if self.exist_gre:
-                
+                self.grenade.draw(self.screen)
                 #lancer de la gravite
                 self.equation_traj(math.radians(self.grenade.angle), self.grenade._InitialX, self.grenade._InitialY, self.temps_ecoule, self.grenade._vitesseX, self.grenade._vitesseY, self.grenade)
+                self.grenade.maj_hitbox()
                 self.temps_ecoule += self.dt
                 
                 #Si plus assez de vitesse pour rebondir
                 if self.grenade.get_vitesseX() < 5:
                     self.grenade.x += self.grenade.get_vitesseX()
                     self.grenade.reset_force() 
+                    self.grenade.maj_hitbox()
                     
                 #la grenade touche le sol
-                if self.grenade.y > 610 :
-                    self.grenade.y = 610
+                if self.grenade.y > 620 :
+                    self.grenade.y = 620
                     self.grenade.rebond()
+                    self.grenade.maj_hitbox()
                     self.temps_ecoule= 0.0
                     self.grenade.setPositionInitiale(self.grenade.x, self.grenade.y)
                     
                     
             #si lance grenade lancer
             if self.exist_langre:
+                self.lanceGrenade.draw(self.screen)
                 self.equation_traj_frott(math.radians(self.lanceGrenade.angle), self.lanceGrenade._InitialX,self.lanceGrenade._InitialY, self.temps_ecoule, self.lanceGrenade._vitesseX, self.lanceGrenade._vitesseY, self.lanceGrenade, 0.5, self.ground.ventX, self.ground.ventY)
                 self.temps_ecoule += self.dt
                 
                 #la grenade touche le sol
-                if self.lanceGrenade.y > 610 :
+                if self.lanceGrenade.y > 630 :
                     for equipe in self.equipe:
                         for player in equipe:
                             self.ranged(player, self.lanceGrenade)
@@ -231,7 +243,7 @@ class Evenement:
                 self.trajectoire_lan(self.lanceGrenade, self.balle)
                 self.affiche_ver(player,"ressource\Perso_Bazooka.png","ressource\Perso_Bazooka_inversee.png") 
                     
-        if int(self.tour) > self.nbr_tour :
+        if int(self.tour) >= self.nbr_tour :
             self.tour = 0
 
 
@@ -239,12 +251,12 @@ class Evenement:
         if player.direction == "DROITE":
             player.change_image(droite) 
         else :
-            player.change_image(gauche) 
+            player.change_image(gauche)
+             
     #gere la zone d'explosion de la grenade
     def ranged(self, player, objet):
-        distance = pygame.math.Vector2(objet.x - player.x-30, objet.y - player.y-30).length()
         pygame.draw.circle(self.screen, (0, 0, 255), (objet.x, objet.y), objet.radius)
-        if distance <= objet.radius:
+        if player.player_rect.colliderect(objet):
             player.pv -= 100
     
     #gere la gravité terrestre sans frottement  
@@ -293,7 +305,7 @@ class Evenement:
     
     #calcul la trajectoire du lance grenade  
     def trajectoire_lan(self, objet, balle):
-        if balle.y == 620 :
+        if balle.y == 620  :
             if len(self.point_trajectoire) >= 2:
                 pygame.draw.lines(self.screen,(255,0,0), False, self.point_trajectoire, 2)
         else :
@@ -327,12 +339,22 @@ class Evenement:
         if self.tour >= self.nbr_tour:
             self.tour = 0
             
+    def text(self, color, content):
+        font = pygame.font.Font(None, 36)
+        
+        return font.render(content, True, color)
+        
+            
     #boucle de jeu
     def run(self):
         tour_actuelle = 0
         while self.running :
             self.screen.fill(GROUND_COLOR)
             self.screen.blit(self.ground.image, self.ground.rect)
+            vent = self.text((255,255,255), f"vent x :{self.ground.ventX}, vent y = {self.ground.ventY}")
+            vent_rect = vent.get_rect()
+            vent_rect.topleft = (10, 10)
+            self.screen.blit(vent, vent_rect)
             self.handle_event()   
             if tour_actuelle != self.tour:
                 self.ground.vent()

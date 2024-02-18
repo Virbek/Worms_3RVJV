@@ -22,4 +22,3 @@ class Ground:
     def vent(self):
         self.ventX = random.randrange(-50, 50, 5)
         self.ventY = random.randrange(-50,50 , 5)
-        print("vent :" ,self.ventX, self.ventY)
