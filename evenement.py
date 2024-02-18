@@ -43,6 +43,7 @@ class Evenement:
         self.point_trajectoire = []    
            
     def handle_event(self):
+        print(self.grenade, self.exist_gre, self.lanceGrenade, self.exist_langre)
         print(self.tour, self.nbr_tour)
         self.test_fin_tour()
         for equipe in self.equipe:
@@ -91,13 +92,38 @@ class Evenement:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
-                    self.grenade = Grenade( player.x + 35, player.y - 10)
-                    self.balle = Grenade(self.grenade.x +35, self.grenade.y - 10)
-                    self.exist_gre = True  
+                    if self.exist_langre: 
+                        del self.lanceGrenade
+                        self.lanceGrenade = None
+                        self.exist_langre = False
+                        self.grenade = Grenade( player.x + 35, player.y - 10)
+                        self.balle = Grenade(self.grenade.x +35, self.grenade.y - 10)
+                        self.exist_gre = True  
+                    elif self.exist_gre != True :
+                        self.grenade = Grenade( player.x + 35, player.y - 10)
+                        self.balle = Grenade(self.grenade.x +35, self.grenade.y - 10)
+                        self.exist_gre = True  
+                    else :
+                        del self.grenade
+                        self.grenade = None
+                        self.exist_gre = False
                 if event.key == pygame.K_l:
-                    self.lanceGrenade = LanceGrenade(player.x + 35, player.y-10)
-                    self.balle = LanceGrenade(self.lanceGrenade.x, self.lanceGrenade.y)
-                    self.exist_langre = True
+                    if self.exist_gre: 
+                        del self.grenade
+                        self.grenade = None
+                        self.exist_gre = False
+                        self.lanceGrenade = LanceGrenade( player.x + 35, player.y - 10)
+                        self.balle = LanceGrenade(self.lanceGrenade.x +35, self.lanceGrenade.y - 10)
+                        self.exist_langre = True 
+                    elif self.exist_langre != True :
+                        self.lanceGrenade = LanceGrenade( player.x + 35, player.y - 10)
+                        self.balle = LanceGrenade(self.lanceGrenade.x +35, self.lanceGrenade.y - 10)
+                        self.exist_langre = True  
+                    else :
+                        del self.lanceGrenade
+                        self.lanceGrenade = None
+                        self.exist_langre = False
+                        
                 if event.key == pygame.K_SPACE:
                     if self.jump != True:
                         if self.exist_gre != True and self.exist_langre != True :

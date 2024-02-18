@@ -75,7 +75,12 @@ class LanceGrenade :
     
     def setPositionInitiale(self, x, y):
         self._InitialX = x
-        self._InitialY = y   
+        self._InitialY = y 
+        
+    def reset_force(self):
+        self._vitesseX = 0
+        self._vitesseY = 0
+        self.angle = 0  
         
     def draw(self,screen):
         screen.blit(self.image, self.rect)
