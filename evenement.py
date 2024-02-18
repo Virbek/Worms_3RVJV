@@ -259,8 +259,16 @@ class Evenement:
     def ranged(self, player, objet):
         pygame.draw.circle(self.screen, (0, 0, 255), (objet.x, objet.y), objet.radius)
         objet.recte = pygame.Rect(objet.x - objet.radius, objet.y - objet.radius, 2* objet.radius, 2* objet.radius)
-        if player.player_rect.colliderect(objet.recte):
+        centre = pygame.Rect(objet.x - 20, objet.y - 20, 2* 20, 2* 20)
+        interieur = pygame.Rect(objet.x - 35, objet.y - 35, 2* 35, 2* 35)
+        if player.player_rect.colliderect(centre):
+            player.pv -= 50
+            player.maj_pv()
+        elif player.player_rect.colliderect(interieur):
             player.pv -= 25
+            player.maj_pv()
+        elif player.player_rect.colliderect(objet.recte):
+            player.pv -= 10
             player.maj_pv()
     
     #gere la gravité terrestre sans frottement  
