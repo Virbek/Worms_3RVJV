@@ -43,8 +43,6 @@ class Evenement:
         self.point_trajectoire = []    
            
     def handle_event(self):
-        print(self.grenade, self.exist_gre, self.lanceGrenade, self.exist_langre)
-        print(self.tour, self.nbr_tour)
         self.test_fin_tour()
         for equipe in self.equipe:
             for player in equipe:
